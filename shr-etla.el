@@ -47,50 +47,52 @@
 	 (inhibit-read-only t)
 	 (window-start (window-start))
 	 prefix)
-    (goto-char start)
-    (forward-line 1)
-    (save-restriction
-      (narrow-to-region (point) end)
-      (cl-loop for (abbr expansion) in result
-	       do
-	       (while (re-search-forward (concat "\\b" abbr "\\b") nil t)
-		 (insert " "
-			 (propertize (concat "(" expansion ")")
-				     'face 'shr-etla))))
-      (goto-char (point-min))
-      ;; Save the indentation at the start of the paragraph.  This is
-      ;; sloppy, but is correct in most cases.
-      (setq prefix
-	    (if (looking-at "\\s-+")
-		(prog1
-		    (match-string 0)
-		  ;; Don't have leading whitespace.
-		  (replace-match ""))
-	      ""))
-      ;; Translate all whitespace (including newlines) into a single
-      ;; space.
-      (while (re-search-forward "\\s-+" nil t)
-	(replace-match " " t t))
-      (goto-char (point-max))
-      (insert "\n")
-      (goto-char (point-min))
-      ;; Fill the text.
-      (let ((shr-indentation 0)
-	    (shr-start nil)
-	    (shr-internal-width (- (shr--window-width)
-				   (string-pixel-width prefix)
-				   100)))
-	(shr-fill-line))
-      ;; Restore the indentation.
-      (goto-char (point-min))
-      (while (not (eobp))
-	(insert prefix)
-	(forward-line 1))
-      (goto-char (point-min)))
-    ;; All this narrowing, point movement and text replacement has
-    ;; probably made Emacs move the window around.  So fix that.
-    (set-window-start nil window-start)
-    (message "Translating...done")))
+    (if (not result)
+	(message "Nothing to translate")
+      (goto-char start)
+      (forward-line 1)
+      (save-restriction
+	(narrow-to-region (point) end)
+	(cl-loop for (abbr expansion) in result
+		 do
+		 (while (re-search-forward (concat "\\b" abbr "\\b") nil t)
+		   (insert " "
+			   (propertize (concat "(" expansion ")")
+				       'face 'shr-etla))))
+	(goto-char (point-min))
+	;; Save the indentation at the start of the paragraph.  This is
+	;; sloppy, but is correct in most cases.
+	(setq prefix
+	      (if (looking-at "\\s-+")
+		  (prog1
+		      (match-string 0)
+		    ;; Don't have leading whitespace.
+		    (replace-match ""))
+		""))
+	;; Translate all whitespace (including newlines) into a single
+	;; space.
+	(while (re-search-forward "\\s-+" nil t)
+	  (replace-match " " t t))
+	(goto-char (point-max))
+	(insert "\n")
+	(goto-char (point-min))
+	;; Fill the text.
+	(let ((shr-indentation 0)
+	      (shr-start nil)
+	      (shr-internal-width (- (shr--window-width)
+				     (string-pixel-width prefix)
+				     100)))
+	  (shr-fill-line))
+	;; Restore the indentation.
+	(goto-char (point-min))
+	(while (not (eobp))
+	  (insert prefix)
+	  (forward-line 1))
+	(goto-char (point-min)))
+      ;; All this narrowing, point movement and text replacement has
+      ;; probably made Emacs move the window around.  So fix that.
+      (set-window-start nil window-start)
+      (message "Translating...done"))))
 
 (defun shr-etla--translate (string)
   "Query the LLM.  Return a list of lists of expansions."
