@@ -67,7 +67,7 @@
       (while (re-search-forward "\\s-+" nil t)
 	(replace-match " " t t))
       (goto-char (point-max))
-      (insert "\n\n")
+      (insert "\n")
       (goto-char (point-min))
       (let ((shr-indentation 0)
 	    (shr-start nil)
