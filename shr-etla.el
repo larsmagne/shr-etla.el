@@ -43,6 +43,7 @@
 	 (string (buffer-substring start end))
 	 (result (shr-etla--translate string))
 	 (inhibit-read-only t)
+	 (window-start (window-start))
 	 prefix)
     (goto-char start)
     (forward-line 1)
@@ -64,21 +65,30 @@
 		  ;; Don't have leading whitespace.
 		  (replace-match ""))
 	      ""))
+      ;; Translate all whitespace (including newlines) into a single
+      ;; space.
       (while (re-search-forward "\\s-+" nil t)
 	(replace-match " " t t))
       (goto-char (point-max))
       (insert "\n")
       (goto-char (point-min))
+      ;; Fill the text.
       (let ((shr-indentation 0)
 	    (shr-start nil)
-	    (shr-internal-width (shr--window-width)))
+	    (shr-internal-width (- (shr--window-width)
+				   (string-pixel-width prefix)
+				   100)))
 	(shr-fill-line))
+      ;; Restore the indentation.
       (goto-char (point-min))
       (while (not (eobp))
 	(insert prefix)
 	(forward-line 1))
-      (goto-char (point-min))
-      (message "Translating...done"))))
+      (goto-char (point-min)))
+    ;; All this narrowing, point movement and text replacement has
+    ;; probably made Emacs move the window around.  So fix that.
+    (set-window-start nil window-start)
+    (message "Translating...done")))
 
 (defun shr-etla--translate (string)
   "Query the LLM.  Return a list of lists of expansions."
@@ -90,6 +100,7 @@
 most common ones (i.e., don't expand \"RAM\" and \"CIA\" and the like).
 Return a JSON array of arrays where the first element in each sub-array
 is the abbreviation and the second element is the expansion.
+The abbreviations aren't necessarily capitalized.
 Do not return anything except this JSON array.  If there is nothing to
 expand, return an empty array."
      (when-let ((url (plist-get eww-data :url)))
