@@ -97,7 +97,7 @@
 
 (defun shr-etla--translate (string)
   "Query the LLM.  Return a list of lists of expansions."
-  (json-parse-string 
+  (query-assistant--json-parse-string
    (query-assistant
     shr-etla-assistant
     (concat
