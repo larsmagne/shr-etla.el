@@ -72,7 +72,8 @@
 	;; Translate all whitespace (including newlines) into a single
 	;; space.
 	(while (re-search-forward "\\s-+" nil t)
-	  (replace-match " " t t))
+	  (unless (equal (match-string 0) " ")
+	    (replace-match " " t t)))
 	(goto-char (point-max))
 	(insert "\n")
 	(goto-char (point-min))
