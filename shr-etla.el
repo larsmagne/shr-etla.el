@@ -16,6 +16,8 @@
 ;; Requirements:  https://github.com/larsmagne/query-assistant.el
 ;;                API keys for some LLM.
 
+;; Usage: `M-x shr-etla RET' in any eww/shr buffer.
+
 ;;; Code:
 
 (require 'cl-lib)
